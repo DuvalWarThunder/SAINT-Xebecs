@@ -2,7 +2,7 @@
 Valorant Team Analytics Dashboard
 
 A comprehensive analytics dashboard for Valorant scrim data.
-Processes JSON files from OCR tools and provides detailed team and player statistics.
+Processes JSON files from OCR tool. For Questions msg _duval_ on discord.
 """
 
 import streamlit as st
