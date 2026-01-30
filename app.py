@@ -455,6 +455,18 @@ class ValorantAnalyzer:
                     actor = event.get('actor')
                     target = event.get('target')
                     event_type = event.get('event_type')
+
+                    if event_type == 'plant' and actor:
+                        actor_clean = clean_player_name(actor)
+                        if actor_clean in match_players_clean:
+                            stats[actor_clean]['plants'] += 1
+                        continue
+
+                    if event_type == 'defuse' and actor:
+                        actor_clean = clean_player_name(actor)
+                        if actor_clean in match_players_clean:
+                            stats[actor_clean]['defuses'] += 1
+                        continue
                     
                     if not actor or not target:
                         continue
