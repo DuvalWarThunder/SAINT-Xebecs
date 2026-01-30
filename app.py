@@ -201,56 +201,54 @@ class ValorantAnalyzer:
     
     def _load_all_matches(self) -> None:
         """Load all JSON match files from data folder."""
-        
         self.matches = []
-
-        # Make path absolute based on app.py location
-        base_path = os.path.dirname(os.path.abspath(__file__))
-        data_path = os.path.join(base_path, self.data_folder)
-
-        if not os.path.exists(data_path):
-            st.warning(f"⚠️ Data folder '{data_path}' not found.")
+        json_files = [f for f in os.listdir(self.data_folder) if f.endswith(".json")]
+        
+        if not json_files:
             return
-
-        json_files = [f for f in os.listdir(data_path) if f.endswith(".json")]
+        
         loaded = 0
         failed = 0
-
+        
         for filename in json_files:
-            filepath = os.path.join(data_path, filename)
+            filepath = os.path.join(self.data_folder, filename)
             try:
                 with open(filepath, encoding="utf-8") as f:
                     match_data = json.load(f)
-                
+                    
+                # Validate basic structure
                 if not self._validate_match_data(match_data, filename):
                     failed += 1
                     continue
                 
+                # Add metadata
                 match_data['filename'] = filename
                 
+                # Parse date
                 try:
-                    match_data['parsed_date'] = datetime.strptime(match_data['date'], '%d/%m/%Y')
+                    match_data['parsed_date'] = datetime.strptime(
+                        match_data['date'], '%d/%m/%Y'
+                    )
                 except Exception:
                     st.warning(f"⚠️ Invalid date format in {filename}, using current date")
                     match_data['parsed_date'] = datetime.now()
                 
                 self.matches.append(match_data)
                 loaded += 1
-
+                
             except json.JSONDecodeError:
                 st.error(f"❌ Invalid JSON in {filename}")
                 failed += 1
             except Exception as e:
                 st.error(f"❌ Error loading {filename}: {e}")
                 failed += 1
-
+        
+        # Sort by date
         self.matches.sort(key=lambda x: x['parsed_date'])
-
+        
         if loaded > 0:
             st.sidebar.info(f"📊 Loaded {loaded} matches ({failed} failed)")
-
-
-
+    
     def _validate_match_data(self, data: Dict, filename: str) -> bool:
         """Validate match data structure.
         
