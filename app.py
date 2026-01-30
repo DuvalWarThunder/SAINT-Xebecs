@@ -84,6 +84,7 @@ def clean_player_name(name: str) -> str:
     name_aliases = {
         "snx|jaywonning4z": "snx|jaywonning42067",
         "snx|jaywonning4z067": "snx|jaywonning42067",
+        "snx|seyu" : "snx|seyu",
     }
     
     # Basic cleaning
