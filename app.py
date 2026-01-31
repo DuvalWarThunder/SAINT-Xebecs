@@ -1325,6 +1325,7 @@ def main():
                     st.plotly_chart(fig_bar, use_container_width=True)
 
                 with col2:
+                    # Calculate midpoints from bin labels like "0-5s" or "10-20s"
                     bin_midpoints = []
                     for bin_label in winrate_by_duration['duration_bin']:
                         if isinstance(bin_label, str) and '-' in bin_label:
@@ -1333,61 +1334,68 @@ def main():
                             bin_midpoints.append((start + end) / 2)
                         else:
                             bin_midpoints.append(0)
-                    
+
                     winrate_by_duration['bin_midpoint'] = bin_midpoints
-                    
+
                     # Sort by bin midpoint
                     winrate_sorted = winrate_by_duration.sort_values('bin_midpoint')
-                    
+
                     x = winrate_sorted['bin_midpoint'].values
                     y = winrate_sorted['win_rate'].values
-                    
+
+                    # FILTER: Only show markers where there are at least 3 rounds
+                    mask = winrate_sorted['total_rounds'] >= 3
+                    x_markers = winrate_sorted.loc[mask, 'bin_midpoint'].values
+                    y_markers = winrate_sorted.loc[mask, 'win_rate'].values
+
                     fig_line = go.Figure()
-                    
-                    # CURVED LINE using Plotly's spline shape (no scipy needed)
+
+                    # CURVED LINE only (no markers here - keeps it clean)
                     fig_line.add_trace(go.Scatter(
                         x=x,
                         y=y,
-                        mode='lines+markers',
-                        name='Trend Line',
+                        mode='lines',
                         line=dict(color='#FF4655', width=3, shape='spline', smoothing=1.3),
-                        marker=dict(size=10, color='white', line=dict(width=2, color='#FF4655'))
+                        hoverinfo='skip'
                     ))
-                    
-                    # Add actual data points with color coding
+
+                    # DOTS only at valid sample sizes (≥3 data points)
                     fig_line.add_trace(go.Scatter(
-                        x=x,
-                        y=y,
+                        x=x_markers,
+                        y=y_markers,
                         mode='markers',
-                        name='Data Points',
                         marker=dict(
                             size=12,
-                            color=y,
+                            color=y_markers,
                             colorscale='RdYlGn',
                             showscale=False,
                             line=dict(width=2, color='white')
                         ),
                         customdata=np.stack([
-                            winrate_sorted['total_rounds'].values,
-                            winrate_sorted['win_rate'].round(1).values
+                            winrate_sorted.loc[mask, 'total_rounds'].values,
+                            winrate_sorted.loc[mask, 'win_rate'].round(1).values
                         ], axis=-1),
                         hovertemplate='<b>Duration: %{x:.0f}s</b><br>Win Rate: %{customdata[1]}%<br>Sample: %{customdata[0]} rounds<extra></extra>'
                     ))
-                    
+
                     fig_line.update_layout(
                         title='Win Rate by Round Duration (Smoothed Curve)',
                         xaxis_title='Round Duration (seconds)',
                         yaxis_title='Win Rate %',
                         yaxis_range=[0, 100],
+                        xaxis=dict(
+                            dtick=5,
+                            tickmode='linear'
+                        ),
                         showlegend=False,
                         plot_bgcolor='rgba(0,0,0,0)',
                         paper_bgcolor='rgba(0,0,0,0)'
                     )
-                    
-                    st.plotly_chart(fig_line, use_container_width=True)              
 
-                # Stats summary
-                st.caption(f"Analysis based on {len(timing_df)} rounds. Showing only duration ranges with 3+ rounds.")
+                    st.plotly_chart(fig_line, use_container_width=True)
+
+                    # Stats summary
+                    st.caption(f"Analysis based on {len(timing_df)} rounds. Showing only duration ranges with 3+ rounds.")
             else:
                 st.info("Not enough data for duration analysis (need at least 3 rounds per bin)")
     
