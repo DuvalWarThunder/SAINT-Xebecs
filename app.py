@@ -1323,16 +1323,11 @@ def main():
                         yaxis_range=[0, 100]
                     )
                     st.plotly_chart(fig_bar, use_container_width=True)
-                
+
                 with col2:
-                    # Line chart version (smoothed)
-                    # Sort by bin midpoint for proper line connection
-                    winrate_by_duration = winrate_by_duration.sort_values('duration_bin')
-                    
-                    # Extract midpoint of each bin for x-axis
                     bin_midpoints = []
                     for bin_label in winrate_by_duration['duration_bin']:
-                        if isinstance(bin_label, str):
+                        if isinstance(bin_label, str) and '-' in bin_label:
                             start = int(bin_label.split('-')[0])
                             end = int(bin_label.split('-')[1].replace('s', ''))
                             bin_midpoints.append((start + end) / 2)
@@ -1341,53 +1336,56 @@ def main():
                     
                     winrate_by_duration['bin_midpoint'] = bin_midpoints
                     
-                    # Create smoothed line using rolling average
+                    # Sort by bin midpoint
                     winrate_sorted = winrate_by_duration.sort_values('bin_midpoint')
-                    winrate_sorted['smoothed_win_rate'] = winrate_sorted['win_rate'].rolling(
-                        window=2, center=True, min_periods=1
-                    ).mean()
+                    
+                    x = winrate_sorted['bin_midpoint'].values
+                    y = winrate_sorted['win_rate'].values
                     
                     fig_line = go.Figure()
                     
-                    # Add smoothed line
+                    # CURVED LINE using Plotly's spline shape (no scipy needed)
                     fig_line.add_trace(go.Scatter(
-                        x=winrate_sorted['bin_midpoint'],
-                        y=winrate_sorted['smoothed_win_rate'],
+                        x=x,
+                        y=y,
                         mode='lines+markers',
-                        name='Smoothed Win Rate',
-                        line=dict(color='#FF4655', width=3),
-                        marker=dict(size=8),
-                        hovertemplate='<b>%{x:.0f}s</b><br>Win Rate: %{y:.1f}%<br>Rounds: %{customdata}<extra></extra>',
-                        customdata=winrate_sorted['total_rounds']
+                        name='Trend Line',
+                        line=dict(color='#FF4655', width=3, shape='spline', smoothing=1.3),
+                        marker=dict(size=10, color='white', line=dict(width=2, color='#FF4655'))
                     ))
                     
-                    # Add actual data points
+                    # Add actual data points with color coding
                     fig_line.add_trace(go.Scatter(
-                        x=winrate_sorted['bin_midpoint'],
-                        y=winrate_sorted['win_rate'],
+                        x=x,
+                        y=y,
                         mode='markers',
-                        name='Actual Win Rate',
+                        name='Data Points',
                         marker=dict(
-                            size=10,
-                            color=winrate_sorted['win_rate'],
+                            size=12,
+                            color=y,
                             colorscale='RdYlGn',
                             showscale=False,
                             line=dict(width=2, color='white')
                         ),
-                        hovertemplate='<b>%{x:.0f}s</b><br>Win Rate: %{y:.1f}%<br>Rounds: %{customdata}<extra></extra>',
-                        customdata=winrate_sorted['total_rounds']
+                        customdata=np.stack([
+                            winrate_sorted['total_rounds'].values,
+                            winrate_sorted['win_rate'].round(1).values
+                        ], axis=-1),
+                        hovertemplate='<b>Duration: %{x:.0f}s</b><br>Win Rate: %{customdata[1]}%<br>Sample: %{customdata[0]} rounds<extra></extra>'
                     ))
                     
                     fig_line.update_layout(
-                        title='Win Rate by Round Duration (Smoothed Line)',
+                        title='Win Rate by Round Duration (Smoothed Curve)',
                         xaxis_title='Round Duration (seconds)',
                         yaxis_title='Win Rate %',
                         yaxis_range=[0, 100],
-                        hovermode='x unified'
+                        showlegend=False,
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)'
                     )
                     
-                    st.plotly_chart(fig_line, use_container_width=True)
-                
+                    st.plotly_chart(fig_line, use_container_width=True)              
+
                 # Stats summary
                 st.caption(f"Analysis based on {len(timing_df)} rounds. Showing only duration ranges with 3+ rounds.")
             else:
