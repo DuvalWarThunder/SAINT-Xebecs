@@ -1541,6 +1541,16 @@ def main():
                 st.metric("Retake Win %", f"{retake_wr:.1f}%")
         else:
             st.info("No retake data available")
+
+        post_plant_winrate = safe_percentage(
+            team_stats['post_plant_wins'],
+            team_stats['post_plant_attempts']
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Post-Plant Attempts", team_stats['post_plant_attempts'])
+        with col2:
+            st.metric("Post-Plant Win %", f"{post_plant_winrate:.1f}%")
     
     # ------------------------------------------------------------------------
     # TAB 6: TRENDS
