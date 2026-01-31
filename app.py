@@ -1423,6 +1423,17 @@ def main():
             )
         
         with col3:
+            anti_eco_wr = safe_percentage(
+                team_stats['anti_eco_wins'],
+                team_stats['anti_eco_rounds']
+            )
+            st.metric(
+                "Anti-Eco Rounds",
+                f"{team_stats['anti_eco_wins']}/{team_stats['anti_eco_rounds']}",
+                f"{anti_eco_wr:.1f}%"
+            )
+        
+        with col4:
             full_buy_wr = safe_percentage(
                 team_stats['full_buy_wins'],
                 team_stats['full_buy_rounds']
