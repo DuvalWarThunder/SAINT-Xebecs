@@ -1401,7 +1401,7 @@ def main():
         
         team_stats = analyzer.calculate_team_stats(filtered_matches)
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             pistol_wr = safe_percentage(
