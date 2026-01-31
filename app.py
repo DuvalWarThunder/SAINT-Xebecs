@@ -475,6 +475,9 @@ class ValorantAnalyzer:
                     target_clean = clean_player_name(target)
                     
                     if event_type == 'kill':
+                        if actor_clean == target_clean:
+                            continue  # Ignore suicides
+
                         if actor_clean in match_players_clean:
                             stats[actor_clean]['kills'] += 1
                             round_killers.add(actor_clean)
@@ -502,8 +505,9 @@ class ValorantAnalyzer:
                         if actor_clean in match_players_clean:
                             stats[actor_clean]['defuses'] += 1
                     
+                    # Damage TO enemies (assists)
                     elif event_type == 'damage':
-                        if actor_clean in match_players_clean and target_clean in match_players_clean:
+                        if actor_clean in match_players_clean and target_clean not in match_players_clean:
                             damage_events[actor_clean].add(target_clean)
                     
                     elif event_type == 'heal':
@@ -1025,6 +1029,8 @@ def main():
         st.warning("⚠️ No matches found with the selected filters.")
         return
     
+    team_stats = analyzer.calculate_team_stats(filtered_matches)
+
     # ========================================================================
     # MAIN TABS
     # ========================================================================
@@ -1044,9 +1050,7 @@ def main():
     
     with tab1:
         st.header("Team Overview")
-        
-        team_stats = analyzer.calculate_team_stats(filtered_matches)
-        
+            
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
