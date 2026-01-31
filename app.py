@@ -844,7 +844,7 @@ class ValorantAnalyzer:
                         opp_econ = int(opp_econ_val)
                     
                     # Pistol rounds
-                    if round_num in [1, 2, 13, 14]:
+                    if round_num in [1, 13]:
                         team_stats['pistol_rounds'] += 1
                         if round_won:
                             team_stats['pistol_wins'] += 1
