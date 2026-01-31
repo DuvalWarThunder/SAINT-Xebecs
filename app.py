@@ -1541,10 +1541,12 @@ def main():
                 team_stats['retake_wins'],
                 team_stats['retake_attempts']
             )
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 st.metric("Retake Attempts", team_stats['retake_attempts'])
             with col2:
+                st.metric("Retake Won", team_stats['retake_wins'])
+            with col3:
                 st.metric("Retake Win %", f"{retake_wr:.1f}%")
         else:
             st.info("No retake data available")
@@ -1556,11 +1558,15 @@ def main():
                 team_stats['post_plant_wins'],
                 team_stats['post_plant_rounds']
             )
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 st.metric("Postplant Rounds", team_stats['post_plant_rounds'])
             with col2:
                 st.metric("Postplant Wins", team_stats['post_plant_wins'])
+            with col3:
+                st.metric("Postplant Win %", f"{post_plant_winrate:.1f}")
+        else:
+            st.info('No Post-Plant data avaliable')
 
     # ------------------------------------------------------------------------
     # TAB 6: TRENDS
