@@ -1545,7 +1545,7 @@ def main():
             with col1:
                 st.metric("Retake Attempts", team_stats['retake_attempts'])
             with col2:
-                st.metric("Retake Won", team_stats['retake_wins'])
+                st.metric("Retake Wins", team_stats['retake_wins'])
             with col3:
                 st.metric("Retake Win %", f"{retake_wr:.1f}%")
         else:
