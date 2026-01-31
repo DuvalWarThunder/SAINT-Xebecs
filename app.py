@@ -873,9 +873,10 @@ class ValorantAnalyzer:
                 # Post-plant tracking
                 has_plant = round_data.get('plant', False)
                 if has_plant:
-                    team_stats['post_plant_rounds'] += 1
-                    if round_won and side == 'Attack':
-                        team_stats['post_plant_wins'] += 1
+                    if side == 'Attack':
+                        team_stats['post_plant_rounds'] += 1
+                        if round_won and side == 'Attack':
+                            team_stats['post_plant_wins'] += 1
                     
                     # Retake tracking
                     if side == 'Defense':
@@ -1554,7 +1555,7 @@ def main():
                 st.metric("Postplant Rounds", team_stats['post_plant_rounds'])
             with col2:
                 st.metric("Postplant Wins", team_stats['post_plant_wins'])
-                
+
     # ------------------------------------------------------------------------
     # TAB 6: TRENDS
     # ------------------------------------------------------------------------
